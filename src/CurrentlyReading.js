@@ -7,7 +7,7 @@ function BooksRow(props) {
         <div className="book-top">
           <div className="book-cover" style={{ width:128, height: 188, backgroundImage: `url(${props.book.imageLinks.thumbnail})`}}></div>
           <div className="book-shelf-changer">
-            <select value={props.value}>
+            <select value={props.book.shelf} onChange={props.change}>
               <option value="none" disabled>Move to...</option>
               <option value="currentlyReading">Currently Reading</option>
               <option value="wantToRead">Want to Read</option>
@@ -36,8 +36,8 @@ function BookSection(props){
         <ol className="books-grid">
           {books.map((book) =>
             (
-              <li>
-                <BooksRow book={book} value={props.value}/>
+              <li key={book.id}>
+                <BooksRow book={book} change={(event)=>(props.update(book,event.target.value))}/>
               </li>
             )
           )}
@@ -48,60 +48,51 @@ function BookSection(props){
   }
 }
 
-class CurrentlyReading extends Component {
-  render(){
-    let currentReads = this.props.current;
-    return(
-      <BookSection section="Currently Reading" books={currentReads} value="currentlyReading"/>
-    )
-  }
-}
-
-class WantToRead extends Component {
-  render(){
-    let wantToRead = this.props.wantTo;
-    return(
-      <BookSection section="Want to Read" books={wantToRead} value="wantToRead"/>
-    )
-  }
-}
-
-class Read extends Component {
-  state={
-    value: "read"
-  }
-  render(){
-    let read = this.props.read;
-    return(
-      <BookSection section="Read" books={read} value="read"/>
-    )
-  }
-}
 
 class MyReadsTable extends Component {
   state= {
-    currentReading: [],
-    wantToRead: [],
-    read: []
+    allBooks: []
   }
 
   componentDidMount(){
     BooksAPI.getAll().then((books) =>
       this.setState(
-        {currentReading:books.filter(book => book.shelf === "currentlyReading"),
-        wantToRead:books.filter(book => book.shelf === "wantToRead"),
-        read:books.filter(book => book.shelf === "read")
-        }
+        {allBooks: books}
       )
     )
   }
 
+  updateBooks = (book,shelf) => {
+    BooksAPI.update(book,shelf)
+    this.setState((state)=>(
+      {
+        allBooks: state.allBooks.map(function(b){
+            if(b.id === book.id){
+              b.shelf = shelf
+              return b
+            }else {
+              return b
+            }
+        })
+      }
+    )
+    )
+  }
+
+  filterBooksByShelf = (books) => {
+    let currentlyReading = books.filter(book => book.shelf === "currentlyReading")
+    let wantToRead = books.filter(book => book.shelf === "wantToRead")
+    let read = books.filter(book => book.shelf === "read")
+    return [currentlyReading,wantToRead,read]
+  }
+
   render(){
+    let[currentlyReading,wantToRead,read] = this.filterBooksByShelf(this.state.allBooks)
     return(
       <div>
-        <CurrentlyReading current={this.state.currentReading}/>
-        <WantToRead wantTo={this.state.wantToRead}/>
-        <Read read={this.state.read}/>
+        <BookSection section="Currently Reading" books={currentlyReading} update={this.updateBooks}/>
+        <BookSection section="wantToRead" books={wantToRead} update={this.updateBooks}/>
+        <BookSection section="read" books={read} update={this.updateBooks}/>
       </div>
     )
   }

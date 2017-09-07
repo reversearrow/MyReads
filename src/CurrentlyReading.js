@@ -1,11 +1,24 @@
 import React, { Component } from 'react';
 import * as BooksAPI from './BooksAPI'
+import { Link,Route } from 'react-router-dom'
 
 function BooksRow(props) {
+    console.log(props.book)
+    let authors = []
+    let imgURL = ''
+    if(props.book.authors){
+      authors= props.book.authors
+    }
+    if(props.book.imageLinks){
+      imgURL=props.book.imageLinks.smallThumbnail
+    }
+    if(!props.book.shelf){
+      props.book.shelf = 'none'
+    }
     return(
       <div className="book">
         <div className="book-top">
-          <div className="book-cover" style={{ width:128, height: 188, backgroundImage: `url(${props.book.imageLinks.thumbnail})`}}></div>
+          <div className="book-cover" style={{ width:128, height: 188, backgroundImage: `url(${imgURL})`}}></div>
           <div className="book-shelf-changer">
             <select value={props.book.shelf} onChange={props.change}>
               <option value="none" disabled>Move to...</option>
@@ -18,7 +31,7 @@ function BooksRow(props) {
         </div>
         <div className="boot-title">{props.book.title}</div>
         <div className="book-authors">{
-          props.book.authors.map(author =>
+          authors.map(author =>
             author
           )
         }</div>
@@ -26,32 +39,56 @@ function BooksRow(props) {
     )
 }
 
-function BookSection(props){
+function RenderBooks(props){
   let books = props.books
-  if(books){
+  return(
+    <div className="bookshelf-books">
+      <ol className="books-grid">
+        {books.map((book) =>
+          (
+            <li key={book.id}>
+              <BooksRow book={book} change={(event)=>(props.update(book,event.target.value))}/>
+            </li>
+          )
+        )}
+      </ol>
+    </div>
+  )
+}
+
+function BookSection(props){
+  if(props.books){
   return(
     <div className="bookshelf">
       <h2 className="bookshelf-title">{props.section}</h2>
-      <div className="bookshelf-books">
-        <ol className="books-grid">
-          {books.map((book) =>
-            (
-              <li key={book.id}>
-                <BooksRow book={book} change={(event)=>(props.update(book,event.target.value))}/>
-              </li>
-            )
-          )}
-        </ol>
-      </div>
+        <RenderBooks books={props.books} update={props.update}/>
     </div>
   )
   }
 }
 
+function SearchBooks(props){
+    return(
+      <div className="search-books">
+            <div className="search-books-bar">
+              <Link className="close-search" to="/">Close</Link>
+              <form>
+                <div className="search-books-input-wrapper">
+                  <input type="text" onChange={props.search} placeholder="Search by title or author"/>
+                </div>
+              </form>
+            </div>
+            <div className="search-books-results">
+              <RenderBooks books={props.books} update={props.update}/>
+            </div>
+      </div>
+    )
+}
 
 class MyReadsTable extends Component {
   state= {
-    allBooks: []
+    allBooks: [],
+    searchedBooks: []
   }
 
   componentDidMount(){
@@ -62,8 +99,38 @@ class MyReadsTable extends Component {
     )
   }
 
-  updateBooks = (book,shelf) => {
+  checkDuplicateBook = (bookid) => {
+    for(let book of this.state.allBooks){
+      if (book.id === bookid){
+        return true
+      }
+    }
+    return false
+  }
+
+  addBook = (book,shelf) => {
+    let duplicate = this.checkDuplicateBook(book.id)
+    console.log(duplicate)
+    if(!duplicate){
+      this.setState((state)=>{
+        allBooks: state.allBooks.push(book)
+      })
+      this.updateBook(book,shelf)
+    }
+  }
+
+  removeBook = (bookid) => {
+    let books = this.state.allBooks.filter(book => book.id !== bookid)
+    this.setState({
+      allBooks: books
+    })
+  }
+
+  updateBook = (book,shelf) => {
     BooksAPI.update(book,shelf)
+    if(shelf === 'none'){
+      this.removeBook(book.id)
+    }
     this.setState((state)=>(
       {
         allBooks: state.allBooks.map(function(b){
@@ -79,6 +146,40 @@ class MyReadsTable extends Component {
     )
   }
 
+  updateCommonBooks = (searchedBooks) => {
+    for(let searchedBook of searchedBooks){
+      for(let book of this.state.allBooks){
+        if (searchedBook.id === book.id){
+          searchedBook.shelf = book.shelf
+      }
+    }
+  }
+}
+
+  search = (event) => {
+    let query = event.target.value
+    if(query){
+      BooksAPI.search(query,10).then((books)=>
+        {
+          if(books){
+            if(books.error !== "empty query"){
+              this.updateCommonBooks(books)
+              this.setState(
+                {
+                  searchedBooks:books
+                }
+              )
+            }else{
+            this.setState({searchedBooks:[]})
+          }
+        }
+      }
+      )
+    }else{
+      this.setState({searchedBooks:[]})
+    }
+  }
+
   filterBooksByShelf = (books) => {
     let currentlyReading = books.filter(book => book.shelf === "currentlyReading")
     let wantToRead = books.filter(book => book.shelf === "wantToRead")
@@ -90,9 +191,22 @@ class MyReadsTable extends Component {
     let[currentlyReading,wantToRead,read] = this.filterBooksByShelf(this.state.allBooks)
     return(
       <div>
-        <BookSection section="Currently Reading" books={currentlyReading} update={this.updateBooks}/>
-        <BookSection section="wantToRead" books={wantToRead} update={this.updateBooks}/>
-        <BookSection section="read" books={read} update={this.updateBooks}/>
+        <Route exact path="/" render={() => (
+          <div>
+          <div className="list-books-title">
+            <h1>MyReads</h1>
+          </div>
+            <BookSection section="Currently Reading" books={currentlyReading} update={this.updateBook}/>
+            <BookSection section="wantToRead" books={wantToRead} update={this.updateBook}/>
+            <BookSection section="read" books={read} update={this.updateBook}/>
+          </div>
+        )}/>
+        <Route exact path="/search" render={() => (
+          <SearchBooks
+          search={this.search}
+          books={this.state.searchedBooks}
+          update={this.addBook}
+          />)}/>
       </div>
     )
   }

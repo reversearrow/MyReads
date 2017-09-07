@@ -1,18 +1,41 @@
 import React from 'react'
-import * as BooksAPI from './BooksAPI'
 import './App.css'
-import MyReadsTable from './CurrentlyReading.js'
-import SearchBooks from './SearchBooks.js'
-import { Link,Route } from 'react-router-dom'
 import MainPage from './MainPage'
+import SearchBooks from './SearchBooks.js'
+import { Route } from 'react-router-dom'
+import * as BooksAPI from './BooksAPI'
+
 
 
 class BooksApp extends React.Component {
+  state= {
+    allBooks: [],
+    searchedBooks: []
+  }
+
+
+  search = (event) => {
+    let query = event.target.value
+    if(query){
+      BooksAPI.search(query,10).then((books)=>
+        {if(books){
+          if(books.error !== "empty query"){
+            this.setState({searchedBooks:books})
+          }else{
+            this.setState({searchedBooks:[]})
+          }
+        }
+      }
+      )
+    }else{
+      this.setState({searchedBooks:[]})
+    }
+  }
+
   render() {
     return (
     <div className="app">
-      <Route exact path="/" component={MainPage}/>
-      <Route exact path="/search" component={SearchBooks}/>
+        <MainPage/>
     </div>
     )
   }

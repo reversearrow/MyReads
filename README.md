@@ -3,6 +3,10 @@
 MyReads app allows users to select and categorize book that is read, are currently reading, or want to read.
 Also user is able to search and add the book.
 
+
+Requirements
+NodeJs and NPM needs to be installed on the server or the machine running the app.
+
 Installation
 Clone the GitHub repository and use npm to install dependencies.
 

@@ -21,7 +21,7 @@ $ npm start
 ```
 
 # Troubleshooting
-If web browser is not started automatically.
+If web browser does not start, use the below commands to launch the app.
 ```
 On Local Machine:
   http://localhost:3000

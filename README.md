@@ -32,7 +32,7 @@ Allowed to search books with following Keywords:
 
 # Troubleshooting
 
-If web browser does not start.
+If web browser does not start, use the below commands to launch the app.
 
 ```
 On Local Machine:
@@ -45,4 +45,4 @@ On Remote Machine:
 
 # License
 
-MyReads released under the [MIT License](docs/License)
+MyReads released under the [MIT License](/License)

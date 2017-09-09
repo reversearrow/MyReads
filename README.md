@@ -16,17 +16,19 @@ $ npm install
 
 # Usage
 To start the app.
+```
 $ npm start
+```
 
 # Troubleshooting
 If web browser is not started automatically.
-
+```
 On Local Machine:
   http://localhost:3000
 
 On Remote Machine:
   http://x.x.x.x:3000
   (x = IP of the Remote Machine)
-
+```
 # License
-MyReads released under the [MIT License](docs/License)
+MyReads released under the [MIT License](/License)

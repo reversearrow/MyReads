@@ -114,7 +114,6 @@ class MyReads extends Component {
 
   addBook = (book, shelf) => {
     let duplicate = this.checkDuplicateBook(book.id);
-    console.log(duplicate);
     if (!duplicate) {
       this.setState(state => {
         allBooks: state.allBooks.push(book);

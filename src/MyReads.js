@@ -3,7 +3,6 @@ import * as BooksAPI from './BooksAPI'
 import { Link,Route } from 'react-router-dom'
 
 function BooksRow(props) {
-    console.log(props.book)
     let authors = []
     let imgURL = ''
     if(props.book.authors){
@@ -85,7 +84,7 @@ function SearchBooks(props){
     )
 }
 
-class MyReadsTable extends Component {
+class MyReads extends Component {
   state= {
     allBooks: [],
     searchedBooks: []
@@ -170,12 +169,14 @@ class MyReadsTable extends Component {
                 }
               )
             }else{
-            this.setState({searchedBooks:[]})
+              console.log("Meet")
+              this.setState({searchedBooks:[]})
           }
         }
       }
       )
     }else{
+      console.log("Meet2")
       this.setState({searchedBooks:[]})
     }
   }
@@ -212,4 +213,4 @@ class MyReadsTable extends Component {
   }
 }
 
-export default MyReadsTable
+export default MyReads

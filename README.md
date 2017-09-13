@@ -1,6 +1,6 @@
 # MyReads
 
-MyReads app allows users to select and categorize book that is read, are currently reading, or want to read. Also user is able to search and add the book.
+MyReads app allows users to select and categorize book that is read, are currently reading, or want to read. Also user is able to search and add the book. Visit my working app at: https://myreadss.herokuapp.com/.
 
 ## Requirements
 
@@ -41,9 +41,6 @@ On Local Machine:
 On Remote Machine:
   http://x.x.x.x:3000
   (x = IP of the Remote Machine)
-
-Working app:
-https://myreadss.herokuapp.com/ 
 ```
 
 ## License
